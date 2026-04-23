@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>АвтоДиплом - симулятор написания диплома</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 АвтоДиплом</h1>
+            <p class="subtitle">Кликай, чтобы написать диплом!</p>
+        </header>
+        
+        <div class="control-panel">
+            <div class="mode-selector">
+                <button onclick="setMode('slow')" id="btn-slow">🐢 Черепаха</button>
+                <button onclick="setMode('normal')" id="btn-normal" class="active">🏃 Нормально</button>
+                <button onclick="setMode('panic')" id="btn-panic">🔥 Паника</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-label">Знаков:</span>
+                    <span id="charCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Страниц:</span>
+                    <span id="pageCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Кликов:</span>
+                    <span id="totalClicks">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Время:</span>
+                    <span id="timer">00:00</span>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button id="btnToggle" onclick="toggleAutoclicker()">▶️ Запустить кликер</button>
+                <button id="btnClick" onclick="clickWord()" disabled>🖱️ НАПИСАТЬ СЛОВО</button>
+                <button onclick="resetProgress()">🔄 Сбросить</button>
+                <button onclick="saveProgress()">💾 Сохранить</button>
+            </div>
+        </div>
+        
+        <div class="editor-container">
+            <div class="editor-header">
+                <button class="tab active">📄 Диплом.docx</button>
+                <button class="tab">📚 Источники.pdf</button>
+                <button class="tab">☕ Кофе-брейк</button>
+            </div>
+            <div class="editor-content" id="editor">
+                <div class="cursor-blink">|</div>
+                <div id="textContent" class="text-content"></div>
+            </div>
+            <div class="status-bar">
+                <span id="currentAction">Ожидание запуска...</span>
+                <span id="progress">0% готовности</span>
+            </div>
+        </div>
+        
+        <div class="notification" id="notification">
+            Запущена симуляция написания диплома 📝
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+    const SUPABASE_URL = 'https://wfxwmegpoariokrrlpsz.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_jzsje5DFfppFKSbmBJBBDQ_A_sO5rf7';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    async function saveToSupabase(state) {
+        try {
+            const { error } = await supabaseClient
+                .from('diploma_progress')
+                .upsert({ id: 1, state: state, updated_at: new Date().toISOString() });
+            if (error) { console.error('Save error:', error); return false; }
+            showNotification('💾 Прогресс сохранён!');
+            return true;
+        } catch (e) { console.error('Save error:', e); return false; }
+    }
+    
+    async function loadFromSupabase() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('diploma_progress').select('state').eq('id', 1).single();
+            if (error || !data) { console.log('No saved progress'); return null; }
+            showNotification('📂 Прогресс загружен!');
+            return data.state;
+        } catch (e) { console.error('Load error:', e); return null; }
+    }
+    </script>
+    <script src="js/autoclicker.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
