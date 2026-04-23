@@ -63,36 +63,31 @@
             </div>
         </div>
         
-        <div class="notification" id="notification">
-            Запущена симуляция написания диплома 📝
-        </div>
+        <div class="notification" id="notification"></div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-    const SUPABASE_URL = 'https://wfxmegpooriotkrplsz.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_jzsje5DFfppFKSbmBJBBDQ_A_sO5rf7';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SB_URL = 'https://wfxmegpooriotkrplsz.supabase.co';
+    const SB_KEY = 'sb_publishable_jzsje5DFfppFKSbmBJBBDQ_A_sO5rf7';
+    const sb = window.supabase.createClient(SB_URL, SB_KEY);
     
     async function saveToSupabase(state) {
         try {
-            const { error } = await supabaseClient
-                .from('diploma_progress')
-                .upsert({ id: 1, state: state, updated_at: new Date().toISOString() });
-            if (error) { console.error('Save error:', error); return false; }
-            showNotification('💾 Прогресс сохранён!');
+            const { error } = await sb.from('diploma_progress').upsert({ id: 1, state: state, updated_at: new Date().toISOString() });
+            if (error) { console.error(error); return false; }
+            showNotification('💾 Сохранено!');
             return true;
-        } catch (e) { console.error('Save error:', e); return false; }
+        } catch (e) { console.error(e); return false; }
     }
     
     async function loadFromSupabase() {
         try {
-            const { data, error } = await supabaseClient
-                .from('diploma_progress').select('state').eq('id', 1).single();
-            if (error || !data) { console.log('No saved progress'); return null; }
-            showNotification('📂 Прогресс загружен!');
+            const { data, error } = await sb.from('diploma_progress').select('state').eq('id', 1).single();
+            if (error || !data) return null;
+            showNotification('📂 Загружено!');
             return data.state;
-        } catch (e) { console.error('Load error:', e); return null; }
+        } catch (e) { return null; }
     }
     </script>
     <script src="js/autoclicker.js"></script>
